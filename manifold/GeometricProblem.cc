@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE (GeometricProblemTest, T, functionTypes_t)
   double R1 = 0.5;
   double R2 = 1;
 
-  roboptim::ManifoldProblemFactory<solver_t::problem_t> probFactory;
+  roboptim::ManifoldProblemFactory<T> probFactory;
 
   ROBOPTIM_DESC_MANIFOLD(R3, ROBOPTIM_REAL_SPACE(3));
   ROBOPTIM_NAMED_FUNCTION_BINDING(SquaredNorm_On_R3, SquaredNormFunc<T>, R3);
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE (GeometricProblemTest, T, functionTypes_t)
   SquaredNorm_On_R3 squaredNormDesc;
   BelongsToPlane_On_R3 belongsToPlaneDesc(1, 0.5, -2, 0.6);
 
-  probFactory.setObjective(squaredNormDesc, r3);
+  probFactory.addObjective(1.0, squaredNormDesc, r3);
 
   typename SquaredNormFunc<T>::intervals_t bounds;
   bounds.push_back(roboptim::Function::makeInterval (R1*R1, R2*R2));
@@ -130,11 +130,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE (GeometricProblemTest, T, functionTypes_t)
   probFactory.addConstraint(belongsToPlaneDesc, r3).setBounds(bounds);
 
   std::cout << *(probFactory.getProblem()) << std::endl;
-#ifndef NDEBUG
-  roboptim::SolverFactory<solver_t> factory ("pgsolver_d", *(probFactory.getProblem()));
-#else
-  roboptim::SolverFactory<solver_t> factory ("pgsolver", *(probFactory.getProblem()));
-#endif
+  roboptim::SolverFactory<solver_t> factory (SOLVER_NAME, *(probFactory.getProblem()));
   solver_t& solver = factory ();
 
   // Solve
